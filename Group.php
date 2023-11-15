@@ -97,16 +97,17 @@ class Group
                 $i++;
                 $count++;
                 $total++;
-                if ($count == 50 || $i == $n) {
-                    $output[] = self::$dom->saveXML();
+                if ($count == 50 || $i >= $n) {
+                    self::$output[] = self::$dom->saveXML();
                     if (self::$tot > $total) {
                         self::build();
+                        $root = self::$dom->getElementsByTagName('eventos')->item(0);
                     }
                 }
             }
         }
         //retorna o array com os XML
-        return $output;
+        return self::$output;
     }
 
     /**
