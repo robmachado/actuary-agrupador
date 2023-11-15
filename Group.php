@@ -34,32 +34,45 @@ class Group
      */
     public static function addXmlEvents(array $events)
     {
-        $xml = $events[0];
+        //coleta os dados base e inicia o xml de saída
         self::init($events[0]);
+        //verifica o limite de quantidade de eventos
         self::checkLimit($events);
+        //pega o node onde serão inseridos os eventos importados dos xml de entrada
         $root = self::$dom->getElementsByTagName('eventos')->item(0);
+        //inicialixa uma classe DOMDocument
         $doc = new \DOMDocument('1.0', 'UTF-8');
         $doc->preserveWhiteSpace = false;
         $doc->formatOutput = false;
         foreach($events as $event) {
+            //carrega a classe os xml passados como parãmetro
             $doc->loadXML($event);
+            //verifica o numero de eventos deste xml
             $n = $doc->getElementsByTagName(self::$event_type)->count();
+            //inicia o loop de importação de nodes
             $i = 0;
             while($i < $n) {
                 $node  = $doc->getElementsByTagName(self::$event_type)->item($i);
+                //checa para ver se ainda se trata do mesmo contribuinte
                 if (!self::checkNrInsc($doc->saveXML($node))) {
+                    //ignora o evento caso o contribuinte for outro
                     continue;
                 }
+                //cria node evento com o atributo id
                 $evt = self::$dom->createElement('evento');
                 $att = self::$dom->createAttribute('id');
                 $att->value = "ID";
                 $evt->appendChild($att);
+                //importa o node do xml origiem para o de destino
                 $new = self::$dom->importNode($node, true);
+                //inclui o node na tag evento
                 $evt->appendChild($new);
+                //inclui a tag evento na tag eventos
                 $root->appendChild($evt);
                 $i++;
             }
         }
+        //retorna o xml criado pelo processo
         return self::$dom->saveXML();
     }
 
