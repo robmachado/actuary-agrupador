@@ -1,6 +1,6 @@
 # Agrupador
 
-A classe Group tem como objetivo coletar dados contidos nos xml de envio do EFD-Reinf e converte-los para a estrutura anterior assincrona com destino a serem importadas em sistemas que não são mantidos atualizados pelos seus criadores.
+A classe Group tem como objetivo coletar dados contidos nos xml de envio do EFD-Reinf e converte-los para a estrutura anterior assincrona, com a finalidade de ser importado em sistemas que não são mantidos atualizados pelos seus criadores.
 
 
 ## Modo de funcionamento
