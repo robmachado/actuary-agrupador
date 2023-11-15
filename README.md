@@ -9,10 +9,10 @@ Devem ser obtidos os xml de envio atuais com o limite de 50 eventos e passa-los 
 
 ### Critérios e Condições
 
-1 - os xml devem conter o mesmo tipo de evento
-2 - devem referenciar o mesmo contribuinte
-3 - a estrutura irá basear a montagem e as regras nos dados contidos no primeiro xml passado como parâmetro 
-4 - caso sejam passados mais de 50 eventos haverá um Exception
+1. os xml devem conter o mesmo tipo de evento
+2. devem referenciar o mesmo contribuinte
+3. a estrutura irá basear a montagem e as regras nos dados contidos no primeiro xml passado como parâmetro 
+4. caso sejam passados mais de 50 eventos haverá um Exception
 
 
 ```php
