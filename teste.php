@@ -7,8 +7,13 @@ require_once 'Group.php';
 $xml = file_get_contents('Como_esta_saindo.xml');
 $out = Group::addXmlEvents([$xml]);
 
+$i = 1;
+foreach ($out as $a) {
+    file_put_contents("saida_{$i}.xml", $a);
+    $i++;
+}
 
-header('Content-Type: application/xml');
-echo $out;
+//header('Content-Type: application/xml');
+//echo $out;
 
 

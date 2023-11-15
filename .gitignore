@@ -1,6 +1,7 @@
 .idea
 limpaTAB.php
 *~
+*.xml
 messdetector.txt
 config.json
 local

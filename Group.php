@@ -7,6 +7,10 @@ class Group
      */
     protected static $event_limit = 50;
     /**
+     * @var int
+     */
+    protected static $tot = 0;
+    /**
      * @var string
      */
     protected static $event_type;
@@ -22,6 +26,10 @@ class Group
      * @var string
      */
     protected static $nrInsc;
+    /**
+     * @var array
+     */
+    protected static $output = [];
 
     /**
      * Reagrupa os eventos originais gerados pelo sped-efdreinf em uma nova estrutura de xml
@@ -36,14 +44,19 @@ class Group
     {
         //coleta os dados base e inicia o xml de saída
         self::init($events[0]);
-        //verifica o limite de quantidade de eventos
-        self::checkLimit($events);
+        self::checkTotal($events);
+        self::build();
         //pega o node onde serão inseridos os eventos importados dos xml de entrada
         $root = self::$dom->getElementsByTagName('eventos')->item(0);
         //inicialixa uma classe DOMDocument
         $doc = new \DOMDocument('1.0', 'UTF-8');
         $doc->preserveWhiteSpace = false;
         $doc->formatOutput = false;
+        $doc1 = new \DOMDocument('1.0', 'UTF-8');
+        $doc1->preserveWhiteSpace = false;
+        $doc1->formatOutput = false;
+        $count = 0;
+        $total = 0;
         foreach($events as $event) {
             //carrega a classe os xml passados como parãmetro
             $doc->loadXML($event);
@@ -53,27 +66,47 @@ class Group
             $i = 0;
             while($i < $n) {
                 $node  = $doc->getElementsByTagName(self::$event_type)->item($i);
+                $reinf = $doc->documentElement;
+                $ns = $reinf->getAttribute('xmlns');
                 //checa para ver se ainda se trata do mesmo contribuinte
                 if (!self::checkNrInsc($doc->saveXML($node))) {
                     //ignora o evento caso o contribuinte for outro
                     continue;
                 }
+                $tag = $doc->saveXML($node);
+                $tag = str_replace(" xmlns=\"{$ns}\"", '', $tag);
+                $doc1->loadXML($tag);
                 //cria node evento com o atributo id
                 $evt = self::$dom->createElement('evento');
                 $att = self::$dom->createAttribute('id');
                 $att->value = "ID";
                 $evt->appendChild($att);
+                $nreinf = self::$dom->createElement('Reinf');
+                $att = self::$dom->createAttribute('xmlns');
+                $att->value = $ns;
+                $nreinf->appendChild($att);
+
                 //importa o node do xml origiem para o de destino
-                $new = self::$dom->importNode($node, true);
+                $new = self::$dom->importNode($doc1->documentElement, true);
                 //inclui o node na tag evento
-                $evt->appendChild($new);
+                $nreinf->appendChild($new);
+                //inclui o node na tag evento
+                $evt->appendChild($nreinf);
                 //inclui a tag evento na tag eventos
                 $root->appendChild($evt);
                 $i++;
+                $count++;
+                $total++;
+                if ($count == 50 || $i == $n) {
+                    $output[] = self::$dom->saveXML();
+                    if (self::$tot > $total) {
+                        self::build();
+                    }
+                }
             }
         }
-        //retorna o xml criado pelo processo
-        return self::$dom->saveXML();
+        //retorna o array com os XML
+        return $output;
     }
 
     /**
@@ -81,18 +114,15 @@ class Group
      * @param $events
      * @return void
      */
-    protected static function checkLimit(array $events)
+    protected static function checkTotal(array $events)
     {
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = false;
-        $tot = 0;
+        self::$tot = 0;
         foreach($events as $event) {
             $dom->loadXML($event);
-            $tot += $dom->getElementsByTagName(self::$event_type)->count();
-        }
-        if ($tot > self::$event_limit) {
-            throw new InvalidArgumentException("Número total de eventos informados é maior que 50");
+            self::$tot += $dom->getElementsByTagName(self::$event_type)->count();
         }
     }
 
@@ -125,6 +155,15 @@ class Group
     {
         self::$event_type = self::getType($xml);
         self::getTagContrib($xml);
+
+    }
+
+    /**
+     * Construtor inicial do xml de saida
+     * @return void
+     */
+    protected static function build()
+    {
         //constroi a estrutura inicial do xml de saída
         $out = "<Reinf xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
             . "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
